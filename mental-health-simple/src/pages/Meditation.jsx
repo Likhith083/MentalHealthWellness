@@ -22,7 +22,7 @@ const breathingExercises = [
     id: 2,
     title: 'Box Breathing',
     description: 'Military technique for focus and stress relief',
-    pattern: { inhale: 4, hold: 4, exhale: 4, hold: 4 },
+    pattern: { inhale: 4, hold: 4, exhale: 4, hold2: 4 },
     duration: 240, // 4 minutes
     benefits: ['Enhances focus', 'Reduces stress', 'Improves concentration'],
     color: '#f0fdf4',
@@ -199,26 +199,14 @@ export default function Meditation() {
       
       if (result.success && result.data) {
         setCurrentQuote(result.data)
+        setIsLoadingQuote(false)
         return
       }
     } catch (error) {
-      console.log('Backend API not available, trying direct API...')
+      console.log('Backend API not available, using fallback quote...')
     }
     
-    try {
-      // Fallback to direct API call (may have CORS issues)
-      const response = await fetch('https://zenquotes.io/api/today')
-      const data = await response.json()
-      
-      if (data && data.length > 0) {
-        setCurrentQuote(data[0])
-        return
-      }
-    } catch (error) {
-      console.log('Direct API also failed, using fallback quote...')
-    }
-    
-    // Final fallback
+    // Use fallback quote if API fails
     setCurrentQuote({
       q: "The present moment is the only time over which we have dominion.",
       a: "Thích Nhất Hạnh",
@@ -237,26 +225,14 @@ export default function Meditation() {
       
       if (result.success && result.data) {
         setCurrentQuote(result.data)
+        setIsLoadingQuote(false)
         return
       }
     } catch (error) {
-      console.log('Backend API not available, trying direct API...')
+      console.log('Backend API not available, using fallback quote...')
     }
     
-    try {
-      // Fallback to direct API call (may have CORS issues)
-      const response = await fetch('https://zenquotes.io/api/random')
-      const data = await response.json()
-      
-      if (data && data.length > 0) {
-        setCurrentQuote(data[0])
-        return
-      }
-    } catch (error) {
-      console.log('Direct API also failed, using fallback quote...')
-    }
-    
-    // Final fallback
+    // Use fallback quote if API fails
     setCurrentQuote({
       q: "The only way to do great work is to love what you do.",
       a: "Steve Jobs",
