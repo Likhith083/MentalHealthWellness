@@ -3,7 +3,6 @@ import { Heart, BookOpen, Brain, FileText, Users, Phone, MessageCircle } from 'l
 import Footer from './Footer'
 
 const navigation = [
-  { name: 'Home', href: '/', icon: Heart },
   { name: 'Mood Tracking', href: '/mood-tracking', icon: Heart },
   { name: 'Journaling', href: '/journaling', icon: BookOpen },
   { name: 'Meditation', href: '/meditation', icon: Brain },
@@ -24,7 +23,7 @@ export default function Layout({ children }) {
             <div className="logo-icon">
               <Heart size={20} />
             </div>
-            Mindful
+            <span className="logo-text">Mindful</span>
           </Link>
           
           <ul className="nav-links">
@@ -38,8 +37,8 @@ export default function Layout({ children }) {
                     to={item.href}
                     className={`nav-link ${isActive ? 'active' : ''}`}
                   >
-                    <Icon size={16} style={{ marginRight: '0.5rem' }} />
-                    {item.name}
+                    <Icon size={16} />
+                    <span className="nav-text">{item.name}</span>
                   </Link>
                 </li>
               )
