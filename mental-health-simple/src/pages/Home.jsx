@@ -12,6 +12,7 @@ import {
   Shield,
   Clock
 } from 'lucide-react'
+import DataMigration from '../components/DataMigration'
 
 const features = [
   {
@@ -138,6 +139,13 @@ export default function Home() {
               )
             })}
           </div>
+        </div>
+      </section>
+
+      {/* Data Migration Section */}
+      <section className="page">
+        <div className="container">
+          <DataMigration />
         </div>
       </section>
 
