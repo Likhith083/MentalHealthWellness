@@ -1,84 +1,13 @@
 import { useState, useEffect } from 'react'
-import { FileText, CheckCircle, ArrowRight, Clock, BarChart3, Download, Share, Star } from 'lucide-react'
+import { FileText, CheckCircle, ArrowRight, Clock, BarChart3, Download, Share, Star, AlertTriangle, Shield } from 'lucide-react'
+import { 
+  assessments, 
+  getQuestionsForAssessment, 
+  getResponseOptions, 
+  getScoreInterpretation 
+} from '../data/assessments.js'
 
-const assessments = [
-  {
-    id: 1,
-    title: 'PHQ-9 Depression Screening',
-    description: 'A validated 9-question screening tool for depression severity.',
-    duration: '5-10 min',
-    questions: 9,
-    category: 'Depression',
-    color: '#eff6ff',
-    iconColor: '#2563eb',
-    completed: false,
-    lastScore: null,
-    lastTaken: null,
-  },
-  {
-    id: 2,
-    title: 'GAD-7 Anxiety Assessment',
-    description: '7-question scale to assess generalized anxiety disorder symptoms.',
-    duration: '3-5 min',
-    questions: 7,
-    category: 'Anxiety',
-    color: '#f0fdf4',
-    iconColor: '#22c55e',
-    completed: false,
-    lastScore: null,
-    lastTaken: null,
-  },
-  {
-    id: 3,
-    title: 'PSS-10 Stress Scale',
-    description: '10-item scale measuring perceived stress levels.',
-    duration: '5 min',
-    questions: 10,
-    category: 'Stress',
-    color: '#fff7ed',
-    iconColor: '#f97316',
-    completed: false,
-    lastScore: null,
-    lastTaken: null,
-  },
-  {
-    id: 4,
-    title: 'SWLS Life Satisfaction',
-    description: '5-question assessment of overall life satisfaction.',
-    duration: '3 min',
-    questions: 5,
-    category: 'Well-being',
-    color: '#faf5ff',
-    iconColor: '#8b5cf6',
-    completed: false,
-    lastScore: null,
-    lastTaken: null,
-  },
-]
-
-const categories = ['All', 'Depression', 'Anxiety', 'Stress', 'Well-being']
-
-const phq9Questions = [
-  "Little interest or pleasure in doing things",
-  "Feeling down, depressed, or hopeless",
-  "Trouble falling or staying asleep, or sleeping too much",
-  "Feeling tired or having little energy",
-  "Poor appetite or overeating",
-  "Feeling bad about yourself - or that you are a failure or have let yourself or your family down",
-  "Trouble concentrating on things, such as reading the newspaper or watching television",
-  "Moving or speaking so slowly that other people could have noticed, or the opposite - being so fidgety or restless that you have been moving around a lot more than usual",
-  "Thoughts that you would be better off dead, or of hurting yourself"
-]
-
-const gad7Questions = [
-  "Feeling nervous, anxious, or on edge",
-  "Not being able to stop or control worrying",
-  "Worrying too much about different things",
-  "Trouble relaxing",
-  "Being so restless that it's hard to sit still",
-  "Becoming easily annoyed or irritable",
-  "Feeling afraid as if something awful might happen"
-]
+const categories = ['All', 'Depression', 'Anxiety', 'Self-Esteem', 'Social Anxiety', 'OCD', 'Burnout', 'Personality']
 
 export default function Assessments() {
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -136,27 +65,17 @@ export default function Assessments() {
     }
   }
 
-  const getScoreInterpretation = (score, assessmentTitle) => {
-    if (assessmentTitle === 'PHQ-9 Depression Screening') {
-      if (score <= 4) return { level: 'Minimal', color: '#22c55e', description: 'Minimal depression symptoms' }
-      if (score <= 9) return { level: 'Mild', color: '#fbbf24', description: 'Mild depression symptoms' }
-      if (score <= 14) return { level: 'Moderate', color: '#f97316', description: 'Moderate depression symptoms' }
-      if (score <= 19) return { level: 'Moderately Severe', color: '#ef4444', description: 'Moderately severe depression symptoms' }
-      return { level: 'Severe', color: '#dc2626', description: 'Severe depression symptoms' }
-    }
-    if (assessmentTitle === 'GAD-7 Anxiety Assessment') {
-      if (score <= 4) return { level: 'Minimal', color: '#22c55e', description: 'Minimal anxiety symptoms' }
-      if (score <= 9) return { level: 'Mild', color: '#fbbf24', description: 'Mild anxiety symptoms' }
-      if (score <= 14) return { level: 'Moderate', color: '#f97316', description: 'Moderate anxiety symptoms' }
-      return { level: 'Severe', color: '#ef4444', description: 'Severe anxiety symptoms' }
-    }
-    return { level: 'Completed', color: '#2563eb', description: 'Assessment completed' }
+  const getScoreInterpretationForAssessment = (score, assessmentId) => {
+    const assessmentType = assessments.find(a => a.id === assessmentId)?.scoring?.interpretation
+    return getScoreInterpretation(score, assessmentType)
   }
 
   const getCurrentQuestions = () => {
-    if (selectedAssessment?.title === 'PHQ-9 Depression Screening') return phq9Questions
-    if (selectedAssessment?.title === 'GAD-7 Anxiety Assessment') return gad7Questions
-    return []
+    return getQuestionsForAssessment(selectedAssessment?.id)
+  }
+
+  const getCurrentResponseOptions = () => {
+    return getResponseOptions(selectedAssessment?.id)
   }
 
   const getAssessmentStats = () => {
@@ -211,6 +130,23 @@ export default function Assessments() {
               </div>
             </div>
 
+            {/* Disclaimer */}
+            <div className="card" style={{ marginBottom: '2rem', backgroundColor: '#fef3c7', border: '1px solid #f59e0b' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                <AlertTriangle size={20} color="#f59e0b" style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#92400e' }}>
+                    Important Disclaimer
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#92400e', margin: 0, lineHeight: '1.4' }}>
+                    These assessments are based on validated clinical questionnaires but are not diagnostic tools or therapeutic tools. 
+                    They do not replace the need for consulting a doctor or psychiatrist. If you are experiencing severe symptoms 
+                    or having thoughts of self-harm, please seek immediate professional help.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Stats Overview */}
             {stats.totalAssessments > 0 && (
               <div className="card" style={{ marginBottom: '2rem' }}>
@@ -237,7 +173,12 @@ export default function Assessments() {
             {/* Assessments Grid */}
             <div className="grid grid-2">
               {filteredAssessments.map((assessment) => (
-                <div key={assessment.id} className="card">
+                <div key={assessment.id} className="card" style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  minHeight: '400px'
+                }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
                     <div style={{ 
                       padding: '0.75rem', 
@@ -254,15 +195,55 @@ export default function Assessments() {
                     )}
                   </div>
                   
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  <h3 style={{ 
+                    fontSize: '1.25rem', 
+                    fontWeight: '600', 
+                    marginBottom: '0.5rem',
+                    minHeight: '3rem',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
                     {assessment.title}
                   </h3>
                   
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem', lineHeight: '1.4' }}>
+                  <p style={{ 
+                    fontSize: '0.875rem', 
+                    color: '#6b7280', 
+                    marginBottom: '1rem', 
+                    lineHeight: '1.4',
+                    minHeight: '3rem',
+                    display: 'flex',
+                    alignItems: 'flex-start'
+                  }}>
                     {assessment.description}
                   </p>
+
+                  {assessment.disclaimer && (
+                    <div style={{ 
+                      padding: '0.5rem', 
+                      backgroundColor: '#fef3c7', 
+                      borderRadius: '0.375rem', 
+                      marginBottom: '1rem',
+                      fontSize: '0.75rem',
+                      color: '#92400e',
+                      minHeight: '2.5rem',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <Shield size={12} style={{ marginRight: '0.25rem', display: 'inline' }} />
+                      {assessment.disclaimer}
+                    </div>
+                  )}
                   
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6b7280', marginBottom: '1rem' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between', 
+                    fontSize: '0.75rem', 
+                    color: '#6b7280', 
+                    marginBottom: '1rem',
+                    minHeight: '1.5rem'
+                  }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Clock size={12} />
                       <span>{assessment.duration}</span>
@@ -270,14 +251,23 @@ export default function Assessments() {
                     <span>{assessment.questions} questions</span>
                   </div>
 
-                  <button
-                    onClick={() => handleStartAssessment(assessment)}
-                    className="btn btn-primary"
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                  >
-                    {assessment.completed ? 'Retake Assessment' : 'Start Assessment'}
-                    <ArrowRight size={16} />
-                  </button>
+                  <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+                    <button
+                      onClick={() => handleStartAssessment(assessment)}
+                      className="btn btn-primary"
+                      style={{ 
+                        width: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '0.5rem',
+                        minHeight: '44px'
+                      }}
+                    >
+                      {assessment.completed ? 'Retake Assessment' : 'Start Assessment'}
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -288,7 +278,8 @@ export default function Assessments() {
                 <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recent Results</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {stats.recentAssessments.map((result) => {
-                    const interpretation = getScoreInterpretation(result.score, result.assessmentTitle)
+                    const assessment = assessments.find(a => a.title === result.assessmentTitle)
+                    const interpretation = getScoreInterpretationForAssessment(result.score, assessment?.id || 1)
                     return (
                       <div key={result.id} style={{ 
                         display: 'flex', 
@@ -318,6 +309,32 @@ export default function Assessments() {
                 </div>
               </div>
             )}
+
+            {/* Crisis Support */}
+            <div className="card" style={{ marginTop: '2rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                <AlertTriangle size={20} color="#dc2626" style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#dc2626' }}>
+                    Need Immediate Help?
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#dc2626', marginBottom: '1rem' }}>
+                    If you are experiencing a mental health crisis or having thoughts of self-harm, please reach out immediately:
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.875rem', color: '#dc2626' }}>
+                      <strong>National Suicide Prevention Lifeline:</strong> 988
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: '#dc2626' }}>
+                      <strong>Crisis Text Line:</strong> Text HOME to 741741
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: '#dc2626' }}>
+                      <strong>Emergency Services:</strong> 911
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -363,12 +380,12 @@ export default function Assessments() {
             {!isCompleted ? (
               <div className="card">
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                  Question {currentQuestion + 1}
+                  Question {currentQuestion + 1} of {selectedAssessment.questions}
                 </h3>
                 
                 <div style={{ marginBottom: '2rem' }}>
                   <p style={{ fontSize: '1.125rem', color: '#374151', marginBottom: '1.5rem' }}>
-                    Over the last 2 weeks, how often have you been bothered by:
+                    {selectedAssessment.instructions}
                   </p>
                   <p style={{ fontSize: '1.25rem', fontWeight: '500', color: '#111827', marginBottom: '2rem' }}>
                     "{getCurrentQuestions()[currentQuestion]}"
@@ -376,12 +393,7 @@ export default function Assessments() {
                 </div>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {[
-                    { value: 0, label: 'Not at all' },
-                    { value: 1, label: 'Several days' },
-                    { value: 2, label: 'More than half the days' },
-                    { value: 3, label: 'Nearly every day' },
-                  ].map((option) => (
+                  {getCurrentResponseOptions().map((option) => (
                     <button
                       key={option.value}
                       onClick={() => handleAnswer(option.value)}
@@ -417,7 +429,7 @@ export default function Assessments() {
 
                 {(() => {
                   const score = answers.reduce((sum, answer) => sum + answer, 0)
-                  const interpretation = getScoreInterpretation(score, selectedAssessment.title)
+                  const interpretation = getScoreInterpretationForAssessment(score, selectedAssessment.id)
                   return (
                     <div style={{ marginBottom: '2rem' }}>
                       <div style={{ 
@@ -428,7 +440,17 @@ export default function Assessments() {
                       }}>
                         {interpretation.level}
                       </div>
-                      <div style={{ color: '#6b7280' }}>{interpretation.description}</div>
+                      <div style={{ color: '#6b7280', marginBottom: '1rem' }}>{interpretation.description}</div>
+                      <div style={{ 
+                        padding: '1rem', 
+                        backgroundColor: '#f0f9ff', 
+                        borderRadius: '0.5rem',
+                        border: '1px solid #bfdbfe',
+                        fontSize: '0.875rem',
+                        color: '#1e40af'
+                      }}>
+                        <strong>Recommendation:</strong> {interpretation.recommendation}
+                      </div>
                     </div>
                   )
                 })()}

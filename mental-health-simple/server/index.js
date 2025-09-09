@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import { connectToDatabase } from './config/database.js'
+import rateLimiter from './middleware/rateLimiter.js'
+import logger from './middleware/logger.js'
 
 // Import routes
 import moodEntriesRouter from './routes/moodEntries.js'
@@ -13,8 +15,13 @@ const app = express()
 const PORT = process.env.PORT || 3001
 
 // Middleware
+app.use(logger)
 app.use(cors())
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+
+// Rate limiting
+app.use(rateLimiter(15 * 60 * 1000, 100)) // 100 requests per 15 minutes
 
 // Connect to MongoDB
 connectToDatabase().catch(console.error)
@@ -45,10 +52,11 @@ app.use((err, req, res, next) => {
 })
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({ 
     success: false, 
-    error: 'API endpoint not found' 
+    error: 'API endpoint not found',
+    path: req.originalUrl
   })
 })
 

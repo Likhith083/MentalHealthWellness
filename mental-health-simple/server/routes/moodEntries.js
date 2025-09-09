@@ -1,4 +1,5 @@
 import express from 'express'
+import { ObjectId } from 'mongodb'
 import { getDatabase } from '../config/database.js'
 import { createMoodEntry, validateMoodEntry } from '../models/MoodEntry.js'
 

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Heart, Calendar, TrendingUp, BarChart3, Plus, Check } from 'lucide-react'
+import apiService from '../services/api.js'
 
 const moodOptions = [
   { id: 'very-happy', label: 'Very Happy', emoji: '😄', value: 5 },
@@ -19,6 +20,34 @@ export default function MoodTracking() {
   const [selectedActivities, setSelectedActivities] = useState([])
   const [notes, setNotes] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [moodEntries, setMoodEntries] = useState([])
+  const [stats, setStats] = useState({ averageMood: 0, totalEntries: 0, moodDistribution: [] })
+  const userId = 'anonymous' // In production, this would come from authentication
+
+  // Load mood entries and stats on component mount
+  useEffect(() => {
+    loadMoodEntries()
+    loadStats()
+  }, [])
+
+  const loadMoodEntries = async () => {
+    try {
+      const response = await apiService.getMoodEntries(userId, 10)
+      setMoodEntries(response.data || [])
+    } catch (error) {
+      console.error('Error loading mood entries:', error)
+    }
+  }
+
+  const loadStats = async () => {
+    try {
+      const response = await apiService.getMoodStats(userId, 7)
+      setStats(response.data || { averageMood: 0, totalEntries: 0, moodDistribution: [] })
+    } catch (error) {
+      console.error('Error loading stats:', error)
+    }
+  }
 
   const handleActivityToggle = (activity) => {
     setSelectedActivities(prev => 
@@ -28,11 +57,39 @@ export default function MoodTracking() {
     )
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Mood entry:', { selectedMood, selectedActivities, notes })
-    setIsSubmitted(true)
-    setTimeout(() => setIsSubmitted(false), 3000)
+    if (!selectedMood) return
+
+    setIsLoading(true)
+    try {
+      const selectedMoodData = moodOptions.find(mood => mood.id === selectedMood)
+      const moodData = {
+        userId,
+        mood: selectedMoodData.value,
+        activities: selectedActivities,
+        notes: notes.trim(),
+        date: new Date()
+      }
+
+      await apiService.createMoodEntry(moodData)
+      setIsSubmitted(true)
+      setTimeout(() => setIsSubmitted(false), 3000)
+      
+      // Reset form
+      setSelectedMood('')
+      setSelectedActivities([])
+      setNotes('')
+      
+      // Reload data
+      loadMoodEntries()
+      loadStats()
+    } catch (error) {
+      console.error('Error saving mood entry:', error)
+      alert('Failed to save mood entry. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -148,18 +205,34 @@ export default function MoodTracking() {
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button
                   type="submit"
-                  disabled={!selectedMood}
+                  disabled={!selectedMood || isLoading}
                   className="btn btn-primary"
                   style={{ 
-                    opacity: !selectedMood ? 0.5 : 1, 
-                    cursor: !selectedMood ? 'not-allowed' : 'pointer',
+                    opacity: (!selectedMood || isLoading) ? 0.5 : 1, 
+                    cursor: (!selectedMood || isLoading) ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem'
                   }}
                 >
-                  <Plus size={20} />
-                  Record Mood
+                  {isLoading ? (
+                    <>
+                      <div style={{ 
+                        width: '16px', 
+                        height: '16px', 
+                        border: '2px solid white', 
+                        borderTop: '2px solid transparent', 
+                        borderRadius: '50%', 
+                        animation: 'spin 1s linear infinite' 
+                      }} />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={20} />
+                      Record Mood
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -175,15 +248,19 @@ export default function MoodTracking() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#6b7280' }}>Average Mood</span>
-                  <span style={{ fontSize: '1.5rem' }}>😊</span>
+                  <span style={{ fontSize: '1.5rem' }}>
+                    {stats.averageMood > 0 ? moodOptions.find(m => m.value === Math.round(stats.averageMood))?.emoji || '😐' : '😐'}
+                  </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#6b7280' }}>Entries</span>
-                  <span style={{ fontWeight: '600' }}>5/7</span>
+                  <span style={{ fontWeight: '600' }}>{stats.totalEntries}/7</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#6b7280' }}>Streak</span>
-                  <span style={{ fontWeight: '600', color: '#22c55e' }}>3 days</span>
+                  <span style={{ color: '#6b7280' }}>Average Score</span>
+                  <span style={{ fontWeight: '600', color: '#22c55e' }}>
+                    {stats.averageMood > 0 ? stats.averageMood.toFixed(1) : '0.0'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -194,28 +271,44 @@ export default function MoodTracking() {
                 Recent Entries
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {[
-                  { date: 'Today', mood: '😊', activities: ['Exercise', 'Reading'] },
-                  { date: 'Yesterday', mood: '😐', activities: ['Work', 'Cooking'] },
-                  { date: '2 days ago', mood: '😄', activities: ['Socializing', 'Hobbies'] },
-                ].map((entry, index) => (
-                  <div key={index} style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    padding: '0.75rem', 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '0.5rem' 
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: '500' }}>{entry.date}</div>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {entry.activities.join(', ')}
+                {moodEntries.length === 0 ? (
+                  <p style={{ color: '#6b7280', fontSize: '0.875rem', textAlign: 'center', padding: '1rem' }}>
+                    No entries yet. Start tracking your mood!
+                  </p>
+                ) : (
+                  moodEntries.slice(0, 3).map((entry, index) => {
+                    const moodEmoji = moodOptions.find(m => m.value === entry.mood)?.emoji || '😐'
+                    const entryDate = new Date(entry.date)
+                    const isToday = entryDate.toDateString() === new Date().toDateString()
+                    const isYesterday = entryDate.toDateString() === new Date(Date.now() - 86400000).toDateString()
+                    
+                    let dateLabel = 'Today'
+                    if (!isToday && !isYesterday) {
+                      dateLabel = entryDate.toLocaleDateString()
+                    } else if (isYesterday) {
+                      dateLabel = 'Yesterday'
+                    }
+
+                    return (
+                      <div key={entry._id || index} style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        padding: '0.75rem', 
+                        backgroundColor: '#f9fafb', 
+                        borderRadius: '0.5rem' 
+                      }}>
+                        <div>
+                          <div style={{ fontWeight: '500' }}>{dateLabel}</div>
+                          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                            {entry.activities?.join(', ') || 'No activities'}
+                          </div>
+                        </div>
+                        <span style={{ fontSize: '1.5rem' }}>{moodEmoji}</span>
                       </div>
-                    </div>
-                    <span style={{ fontSize: '1.5rem' }}>{entry.mood}</span>
-                  </div>
-                ))}
+                    )
+                  })
+                )}
               </div>
             </div>
 
@@ -242,6 +335,13 @@ export default function MoodTracking() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3001/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 
 class ApiService {
   constructor() {
@@ -17,14 +17,32 @@ class ApiService {
 
     try {
       const response = await fetch(url, config)
-      const data = await response.json()
+      
+      // Handle non-JSON responses
+      let data
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json()
+      } else {
+        data = { message: await response.text() }
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`)
+        const error = new Error(data.error || data.message || `HTTP error! status: ${response.status}`)
+        error.status = response.status
+        error.data = data
+        throw error
       }
 
       return data
     } catch (error) {
+      // Network errors
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        const networkError = new Error('Unable to connect to the server. Please check your internet connection and try again.')
+        networkError.type = 'NETWORK_ERROR'
+        throw networkError
+      }
+      
       console.error('API request failed:', error)
       throw error
     }
