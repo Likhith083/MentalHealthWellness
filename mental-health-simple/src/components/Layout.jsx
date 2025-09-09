@@ -1,15 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Heart, BookOpen, Brain, FileText, Users, Phone, MessageCircle } from 'lucide-react'
+import { BarChart3, BookOpen, Brain, FileText, Users, Heart, PenTool } from 'lucide-react'
 import Footer from './Footer'
 
 const navigation = [
-  { name: 'Mood Tracking', href: '/mood-tracking', icon: Heart },
-  { name: 'Journaling', href: '/journaling', icon: BookOpen },
-  { name: 'Meditation', href: '/meditation', icon: Brain },
+  { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+  { name: 'Mental Health Hub', href: '/journaling', icon: BookOpen },
+  { name: 'Mental Health Tools', href: '/meditation', icon: Brain },
   { name: 'Assessments', href: '/assessments', icon: FileText },
-  { name: 'Find Therapist', href: '/therapist-matching', icon: Users },
-  { name: 'Crisis Support', href: '/crisis-support', icon: Phone },
-  { name: 'AI Chatbot', href: '/ai-chatbot', icon: MessageCircle },
+  { name: 'Blogs', href: '/blogs', icon: PenTool },
+  { name: 'Support', href: '/support', icon: Users },
 ]
 
 export default function Layout({ children }) {

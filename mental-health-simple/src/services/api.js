@@ -111,6 +111,10 @@ class ApiService {
     return this.request(`/journal-entries/${userId}/search?q=${encodeURIComponent(query)}&limit=${limit}`)
   }
 
+  async getJournalStats(userId, days = 30) {
+    return this.request(`/journal-entries/${userId}/stats?days=${days}`)
+  }
+
   // Assessments
   async getAssessmentResults(userId, limit = 50, offset = 0, assessmentId = null) {
     const params = new URLSearchParams({ limit, offset })

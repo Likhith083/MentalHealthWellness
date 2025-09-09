@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
 import { 
-  Heart, 
+  BarChart3,
   BookOpen, 
   Brain, 
   FileText, 
+  Target,
   Users, 
-  Phone, 
-  MessageCircle,
   ArrowRight,
   CheckCircle,
   Shield,
@@ -16,24 +15,24 @@ import DataMigration from '../components/DataMigration'
 
 const features = [
   {
-    name: 'Mood Tracking',
-    description: 'Track your daily mood and emotional patterns to better understand your mental health journey.',
-    href: '/mood-tracking',
-    icon: Heart,
-    color: '#fef2f2',
-    iconColor: '#ef4444',
+    name: 'Dashboard',
+    description: 'Your mental health overview with insights, progress tracking, and comprehensive goal management.',
+    href: '/dashboard',
+    icon: BarChart3,
+    color: '#f0f9ff',
+    iconColor: '#0ea5e9',
   },
   {
-    name: 'Journaling',
-    description: 'Express your thoughts and feelings through guided journaling prompts and free-form writing.',
+    name: 'Mental Health Hub',
+    description: 'Track your mood, journal your thoughts, and get personalized AI support - all in one comprehensive hub.',
     href: '/journaling',
     icon: BookOpen,
     color: '#eff6ff',
     iconColor: '#2563eb',
   },
   {
-    name: 'Meditation',
-    description: 'Access guided meditation sessions designed to reduce stress and improve mindfulness.',
+    name: 'Mental Health Tools',
+    description: 'Comprehensive wellness tools including breathing exercises, sleep aids, focus techniques, and daily inspiration.',
     href: '/meditation',
     icon: Brain,
     color: '#faf5ff',
@@ -48,28 +47,20 @@ const features = [
     iconColor: '#22c55e',
   },
   {
-    name: 'Find a Therapist',
-    description: 'Connect with licensed mental health professionals who match your needs and preferences.',
-    href: '/therapist-matching',
+    name: 'Blogs & Tips',
+    description: 'Expert insights, practical tips, and evidence-based strategies to support your mental wellness journey.',
+    href: '/blogs',
+    icon: Target,
+    color: '#fef3c7',
+    iconColor: '#f59e0b',
+  },
+  {
+    name: 'Support & Resources',
+    description: 'Get immediate crisis support or find professional mental health care that matches your needs.',
+    href: '/support',
     icon: Users,
     color: '#f0f9ff',
     iconColor: '#0ea5e9',
-  },
-  {
-    name: 'Crisis Support',
-    description: 'Get immediate help and resources when you need them most.',
-    href: '/crisis-support',
-    icon: Phone,
-    color: '#fef2f2',
-    iconColor: '#ef4444',
-  },
-  {
-    name: 'AI Chatbot',
-    description: 'Chat with our AI assistant for immediate support and guidance (Coming Soon).',
-    href: '/ai-chatbot',
-    icon: MessageCircle,
-    color: '#f9fafb',
-    iconColor: '#6b7280',
   },
 ]
 
@@ -97,8 +88,8 @@ export default function Home() {
             and evidence-based resources designed to help you thrive.
           </p>
           <div className="hero-actions">
-            <Link to="/mood-tracking" className="btn btn-primary">
-              Start Your Journey
+            <Link to="/dashboard" className="btn btn-primary">
+              View Dashboard
               <ArrowRight size={20} style={{ marginLeft: '0.5rem' }} />
             </Link>
             <Link to="/assessments" className="btn btn-outline">
@@ -204,10 +195,10 @@ export default function Home() {
             Join thousands of people who are taking control of their mental wellness with Mindful.
           </p>
           <div className="hero-actions">
-            <Link to="/mood-tracking" className="btn" style={{ backgroundColor: 'white', color: '#2563eb' }}>
-              Get Started Today
+            <Link to="/dashboard" className="btn" style={{ backgroundColor: 'white', color: '#2563eb' }}>
+              View Dashboard
             </Link>
-            <Link to="/crisis-support" className="btn" style={{ backgroundColor: 'transparent', color: 'white', border: '1px solid white' }}>
+            <Link to="/support" className="btn" style={{ backgroundColor: 'transparent', color: 'white', border: '1px solid white' }}>
               Need Immediate Help?
             </Link>
           </div>

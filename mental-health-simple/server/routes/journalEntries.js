@@ -145,4 +145,69 @@ router.get('/:userId/search', async (req, res) => {
   }
 })
 
+// Get journal statistics
+router.get('/:userId/stats', async (req, res) => {
+  try {
+    const db = getDatabase()
+    const { userId } = req.params
+    const { days = 30 } = req.query
+    
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - parseInt(days))
+    
+    // Get total entries count
+    const totalEntries = await db.collection('journalEntries').countDocuments({ userId })
+    
+    // Get average mood
+    const moodEntries = await db.collection('journalEntries')
+      .find({ userId, mood: { $exists: true, $ne: null } })
+      .toArray()
+    
+    const averageMood = moodEntries.length > 0 
+      ? moodEntries.reduce((sum, entry) => sum + (entry.mood || 0), 0) / moodEntries.length 
+      : 0
+    
+    // Get most used template
+    const templateCounts = await db.collection('journalEntries')
+      .aggregate([
+        { $match: { userId, 'template.title': { $exists: true } } },
+        { $group: { _id: '$template.title', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 1 }
+      ])
+      .toArray()
+    
+    const mostUsedTemplate = templateCounts.length > 0 ? templateCounts[0]._id : ''
+    
+    // Get recent mood trend (last 7 days)
+    const recentMoodTrend = await db.collection('journalEntries')
+      .find({
+        userId,
+        mood: { $exists: true, $ne: null },
+        date: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+      })
+      .sort({ date: 1 })
+      .toArray()
+    
+    const moodTrend = recentMoodTrend.map(entry => ({
+      date: entry.date,
+      mood: entry.mood,
+      moodEmoji: entry.moodEmoji
+    }))
+    
+    res.json({
+      success: true,
+      data: {
+        totalEntries,
+        averageMood: Math.round(averageMood * 10) / 10,
+        mostUsedTemplate,
+        recentMoodTrend: moodTrend
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching journal stats:', error)
+    res.status(500).json({ success: false, error: 'Failed to fetch journal statistics' })
+  }
+})
+
 export default router

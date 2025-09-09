@@ -10,6 +10,7 @@ import journalEntriesRouter from './routes/journalEntries.js'
 import assessmentsRouter from './routes/assessments.js'
 import meditationRouter from './routes/meditation.js'
 import chatRouter from './routes/chat.js'
+import quotesRouter from './routes/quotes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -32,6 +33,7 @@ app.use('/api/journal-entries', journalEntriesRouter)
 app.use('/api/assessments', assessmentsRouter)
 app.use('/api/meditation', meditationRouter)
 app.use('/api/chat', chatRouter)
+app.use('/api/quotes', quotesRouter)
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

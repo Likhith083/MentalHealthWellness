@@ -4,8 +4,10 @@ export const createJournalEntry = (data) => {
     userId: data.userId || 'anonymous',
     title: data.title || 'Untitled Entry',
     content: data.content,
-    prompt: data.prompt || null, // journal prompt used
-    mood: data.mood || null, // associated mood
+    template: data.template || null, // journal template used
+    prompt: data.prompt || null, // legacy support
+    mood: data.mood || null, // associated mood (1-5 scale)
+    moodEmoji: data.moodEmoji || null, // mood emoji representation
     tags: data.tags || [],
     isPrivate: data.isPrivate !== false, // default to private
     date: data.date || new Date(),
@@ -43,6 +45,18 @@ export const validateJournalEntry = (data) => {
   
   if (data.tags && data.tags.some(tag => typeof tag !== 'string' || tag.length > 50)) {
     errors.push('Each tag must be a string with less than 50 characters')
+  }
+  
+  if (data.mood && (typeof data.mood !== 'number' || data.mood < 1 || data.mood > 5)) {
+    errors.push('Mood must be a number between 1 and 5')
+  }
+  
+  if (data.moodEmoji && typeof data.moodEmoji !== 'string') {
+    errors.push('Mood emoji must be a string')
+  }
+  
+  if (data.template && typeof data.template !== 'object') {
+    errors.push('Template must be an object')
   }
   
   return {
